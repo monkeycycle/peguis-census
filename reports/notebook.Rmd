@@ -1,0 +1,42 @@
+---
+title: "`r getOption('startr.title')`"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+author: "`r getOption('startr.author')`"
+output:
+  html_notebook:
+    code_folding: hide
+    df_print: kable
+    self_contained: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 3
+editor_options: 
+  chunk_output_type: inline
+---
+
+## First heading
+
+Text goes here.
+
+```{r, config_setup}
+# Requirements ------------------------------------------------------------
+if (!require('devtools')) install.packages('devtools'); library('devtools')
+if (!require('upstartr')) install.packages('upstartr'); library('upstartr')
+if (!require('waapihktheme')) install_github('monkeycycle/waapihktheme', force=TRUE); library('waapihktheme')
+
+run_config()
+run_process()
+run_analyze()
+run_visualize()
+run_notebook()
+
+```
+
+
+
+### Age
+```{r, age_characteristics}
+
+plot(plot_population_age)
+
+```
