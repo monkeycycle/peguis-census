@@ -1,8 +1,12 @@
 ---
 title: "`r getOption('startr.title')`"
-date: "`r format(Sys.Date(), '%B %d, %Y')`"
 author: "`r getOption('startr.author')`"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output:
+  html_document:
+    toc: yes
+    toc_depth: '3'
+    df_print: paged
   html_notebook:
     code_folding: hide
     df_print: kable
@@ -10,16 +14,13 @@ output:
     theme: cosmo
     toc: yes
     toc_depth: 3
-editor_options: 
+editor_options:
   chunk_output_type: inline
 ---
 
-## First heading
 
-Text goes here.
+```{r config_setup, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.66, fig.height=8.66, results="asis"}
 
-```{r, config_setup}
-# Requirements ------------------------------------------------------------
 if (!require('devtools')) install.packages('devtools'); library('devtools')
 if (!require('upstartr')) install.packages('upstartr'); library('upstartr')
 if (!require('waapihktheme')) install_github('monkeycycle/waapihktheme', force=TRUE); library('waapihktheme')
@@ -28,15 +29,59 @@ run_config()
 run_process()
 run_analyze()
 run_visualize()
-run_notebook()
 
 ```
 
 
 
-### Age
-```{r, age_characteristics}
+### Age groups
+```{r age_characteristics, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8.66, fig.height=8.66, results="asis"}
 
-plot(plot_population_age)
+
+census_population_age_rates_tall <- census_population_age_rates %>%
+  select(-total) %>%
+  pivot_longer(
+    cols=c(men, women),
+    names_to = "gender",
+    values_to = "percent"
+  )
+
+
+p_population_age <- ggplot(census_population_age_rates_tall,
+         
+                                             aes(x=age_group,
+                               y=ifelse(gender=="men", -percent, percent),
+                               colour=gender,
+                               fill=gender,
+                               hjust=ifelse(gender=="men", 1.3, -.5))
+                           ) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label=percent), color="#666666" ) + 
+  scale_colour_manual(values = c("#5d7b7c", "#c9a790"), labels = c("Men", "Women")) +
+  scale_fill_manual(values = c("#5d7b7c", "#c9a790"), labels = c("Men", "Women")) +
+  scale_y_continuous(labels = abs, limits = max(census_population_age_rates_tall$percent + 5) * c(-1,1)) +
+  coord_flip() +
+  labs(
+    title = "Peguis 1B, Indian reserve — age groups",
+    subtitle = "",
+    x="Age",
+    y="Percent of population",
+    caption="Source: Statistics Canada, Census Profile (98-316-X2021001)"
+  ) +
+  ggthemes::theme_few() +
+  theme_waapihk(base_family = "Open Sans") +
+  theme(
+    legend.position = c(.5,.75),
+    legend.text = ggplot2::element_text(size = 10),
+  ) +
+  facet_wrap(~ geography)
+
+
+plot_population_age <- finalize_plot(plot_name = p_population_age,
+                                    save_filepath = dir_plots("plot_population_age.png"),
+                                    source = "Source: Statistics Canada, Census Profile (98-316-X2021001)",
+                                    width_pixels = 640,
+                                    height_pixels = 640)
+
 
 ```
